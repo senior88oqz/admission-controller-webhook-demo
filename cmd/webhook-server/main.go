@@ -55,28 +55,30 @@ func applyPriorityDefaults(req *v1beta1.AdmissionRequest) ([]patchOperation, err
 	}
 
 	// Retrieve the `runAsNonRoot` and `runAsUser` values.
-	var priority *int32
-
-	if pod.Spec.Priority != nil {
-		priority = pod.Spec.Priority
-	}
 
 	priorityClassName := pod.Spec.PriorityClassName
 
 	// Create patch operations to apply sensible defaults, if those options are not set explicitly.
 	var patches []patchOperation
-	if priority == nil || priorityClassName == "" {
+	if pod.ObjectMeta.Name == "webhook-server" {
+		return nil, nil
+	}
+	if priorityClassName == "" {
 		patches = append(patches, patchOperation{
 			Op:   "add",
 			Path: "/spec/priorityClassName",
-			// The value must not be true if runAsUser is set to 0, as otherwise we would create a conflicting
 			// configuration ourselves.
 			Value: "high-priority",
-		})
+		},
+			patchOperation{
+				Op:   "remove",
+				Path: "/spec/priority",
+			},
+		)
 
 	} else {
 		// Do nothing when priority is set
-		return nil, errors.New("priority is not specify")
+		return nil, errors.New("priority is specify")
 	}
 
 	return patches, nil
