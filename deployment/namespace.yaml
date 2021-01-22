@@ -1,0 +1,8 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: webhook-demo
+  labels:
+    addon: namespaces
+    name: webhook-demo
